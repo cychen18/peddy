@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 HERE = op.dirname(op.abspath(__file__))
 
-def pca(fig_path, sitesfile, genotype_matrix=None, sites=None):
+def pca(fig_path, sitesfile, genotype_matrix=None, sites=None, aprob=0.65):
 
     f = sitesfile+".bin.gz"
     t0 = time.time()
@@ -80,7 +80,7 @@ def pca(fig_path, sitesfile, genotype_matrix=None, sites=None):
         s = s * 15
         pred = clf.predict(genotype_matrix)
         proba = clf.predict_proba(genotype_matrix).max(axis=1)
-        pred[proba < 0.65] = len(ipops) - 1
+        pred[proba < aprob] = len(ipops) - 1
 
         df = pd.DataFrame({'ancestry-prediction': [ipops[v] for v in pred],
                            'ancestry-prob': proba,
