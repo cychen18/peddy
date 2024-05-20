@@ -842,6 +842,7 @@ class Ped(object):
 
     def het_check(self, vcf_path, plot=False, ncpus=1, min_depth=8,
                   sites=op.join(op.dirname(__file__), 'GRCH37.sites'),
+                  aprob=0.65,
                   **kwargs):
         """
         kwargs is not used, but added here to allow same args as ped_check
@@ -876,7 +877,7 @@ class Ped(object):
                 pca_plot = "%s.%s%s" % (pca_plot, "pca.", ext)
         else:
             pca_plot = False
-        pca_df, background_pca_df = pca(pca_plot, sitesfile, gt_types, sites)
+        pca_df, background_pca_df = pca(pca_plot, sitesfile, gt_types, sites, aprob)
 
         # not find outliers.
         depth = np.array([v['median_depth'] for v in sample_ranges.values()])

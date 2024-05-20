@@ -26,7 +26,7 @@ LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 log = logging.getLogger(__name__)
 
 def run(args):
-    check, pedf, vcf, plot, prefix, each, ncpus, sites = args
+    check, pedf, vcf, plot, prefix, each, ncpus, sites, aprob = args
     # only print warnings for het_check
     p = Ped(pedf, warn=False)
     log.info("\033[1;31m%s\033[0m" % check)
@@ -38,7 +38,7 @@ def run(args):
         plot = prefix + "." + check + ".png"
 
     if check in ("ped_check", "het_check"):
-        kwargs = {'sites': sites}
+        kwargs = {'sites': sites, 'aprob': aprob}
         df = getattr(p, check)(vcf, plot=plot, each=each, ncpus=ncpus,
                                prefix=prefix, **kwargs)
         if check == "het_check":
@@ -141,6 +141,10 @@ def correct_sex_errors(ped_df):
           " for this will use hg38 sites shipped with peddy.",
     default=op.join(op.dirname(__file__), 'GRCH37.sites')
 )
+@click.option("--aprob",
+    help="Ancestry probability threshold.",
+    default=0.65
+)
 @click.option('--loglevel',
     default='INFO',
     type=click.Choice(LOG_LEVELS),
@@ -148,7 +152,7 @@ def correct_sex_errors(ped_df):
     show_default=True,
 )
 @click.version_option(version=__version__, prog_name="peddy")
-def peddy(vcf, ped, plot, procs, prefix, each, sites, loglevel):
+def peddy(vcf, ped, plot, procs, prefix, each, sites, aprob, loglevel):
     """pleasingly pythonic pedigree manipulation"""
     coloredlogs.install(log_level=loglevel)
     log.info("Running Peddy version %s", __version__)
@@ -205,7 +209,7 @@ def peddy(vcf, ped, plot, procs, prefix, each, sites, loglevel):
     vals = {'title': op.splitext(op.basename(ped))[0], 'each': each}
     # background_df only present for het-check. It's the PC's from 1000G for
     # plotting.
-    for check, df, background_df in map(run, [(check, ped, vcf, plot, prefix, each, procs, sites) for check
+    for check, df, background_df in map(run, [(check, ped, vcf, plot, prefix, each, procs, sites, aprob) for check
                                  in ("ped_check", "het_check", "sex_check")]):
         if df is None:
             vals[check] = []
